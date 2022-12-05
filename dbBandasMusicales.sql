@@ -1,12 +1,6 @@
 CREATE DATABASE IF NOT EXISTS bandas;
 USE bandas;
 
-CREATE TABLE estadistica_banda (
-	id_estadistica INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
-	cant_seguidores INT DEFAULT '0',
-    cant_reacciones INT DEFAULT '0'
-);
-
 CREATE TABLE genero (
 	id_genero INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
     nombre_genero VARCHAR(30)
@@ -51,17 +45,11 @@ CREATE TABLE grupo_musical (
     anio_origen DATE NOT NULL,
     imagen_banda VARCHAR(200) DEFAULT 'imagen-generica.jpg',
     id_contacto INT,
-    id_estadistica_banda INT,
     id_redes INT,
     id_genero INT,
 	CONSTRAINT FK_grupomusical_contacto
     FOREIGN KEY (id_contacto)
     REFERENCES contacto(id_contacto)
-		ON DELETE CASCADE
-        ON UPDATE CASCADE,
-	CONSTRAINT FK_grupomusical_estadisticas
-    FOREIGN KEY (id_estadistica_banda)
-    REFERENCES estadistica_banda (id_estadistica)
 		ON DELETE CASCADE
         ON UPDATE CASCADE,
     CONSTRAINT FK_grupomusical_redes
@@ -75,6 +63,7 @@ CREATE TABLE grupo_musical (
 		ON DELETE CASCADE
         ON UPDATE CASCADE
 );
+
 CREATE TABLE evento (
 	id_evento INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
     precio_ticket DECIMAL(8,2) NOT NULL,
@@ -163,29 +152,22 @@ CREATE TABLE usuario (
     user VARCHAR(30) NOT NULL UNIQUE,
     apellido VARCHAR(50) NOT NULL,
     fecha_nacimiento DATE NOT NULL,
-    dni VARCHAR(11) NOT NULL UNIQUE,
-    id_grupo INT,
-    id_cancion INT,
-    id_discografia INT,
-    id_videoclip INT,
-    CONSTRAINT FK_usuario_grupo
+    dni VARCHAR(11) NOT NULL UNIQUE   
+);
+
+CREATE TABLE estadistica_usuario (
+	id_estadistica INT NOT NULL UNIQUE AUTO_INCREMENT ,
+	id_grupo INT,
+    id_usuario INT,
+    PRIMARY KEY(id_grupo,id_usuario),
+    CONSTRAINT FK_estadistica_grupo
     FOREIGN KEY (id_grupo)
     REFERENCES grupo_musical(id_grupo)
 		ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT FK_usuario_cancion
-    FOREIGN KEY (id_cancion)
-    REFERENCES cancion(id_cancion)
-		ON DELETE CASCADE
-        ON UPDATE CASCADE,
-	CONSTRAINT FK_usuario_discografia
-    FOREIGN KEY (id_discografia)
-    REFERENCES discografia(id_disco)
-		ON DELETE CASCADE
-        ON UPDATE CASCADE,
-	CONSTRAINT FK_usuario_videoclip
-    FOREIGN KEY (id_videoclip)
-    REFERENCES videoclip (id_videoclip)
+    CONSTRAINT FK_estadistica_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES usuario(id_user)
 		ON DELETE CASCADE
         ON UPDATE CASCADE
 );
