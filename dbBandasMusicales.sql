@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS bandas;
-USE bandas;
+CREATE DATABASE IF NOT EXISTS bandas_musicales;
+USE bandas_musicales;
 
 CREATE TABLE genero (
 	id_genero INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
