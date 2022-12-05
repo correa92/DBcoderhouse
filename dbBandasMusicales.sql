@@ -26,6 +26,15 @@ CREATE TABLE contacto (
     cp VARCHAR(10)
 );
 
+CREATE TABLE usuario (
+	id_user INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    user VARCHAR(30) NOT NULL UNIQUE,
+    apellido VARCHAR(50) NOT NULL,
+    fecha_nacimiento DATE NOT NULL,
+    dni VARCHAR(11) NOT NULL UNIQUE   
+);
+
 CREATE TABLE establecimiento (
 	id_lugar INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(40) NOT NULL,
@@ -146,14 +155,7 @@ CREATE TABLE cancion (
         ON UPDATE CASCADE    
 );
 
-CREATE TABLE usuario (
-	id_user INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    user VARCHAR(30) NOT NULL UNIQUE,
-    apellido VARCHAR(50) NOT NULL,
-    fecha_nacimiento DATE NOT NULL,
-    dni VARCHAR(11) NOT NULL UNIQUE   
-);
+
 
 CREATE TABLE estadistica_usuario (
 	id_estadistica INT NOT NULL UNIQUE AUTO_INCREMENT ,
