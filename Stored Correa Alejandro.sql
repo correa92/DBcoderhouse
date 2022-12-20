@@ -1595,5 +1595,3 @@ END$$
 
 DELIMITER ;
 ;
-
-

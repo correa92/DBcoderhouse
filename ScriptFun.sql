@@ -1,3 +1,4 @@
+
 CREATE DATABASE IF NOT EXISTS bandas_musicales;
 USE bandas_musicales;
 
@@ -1544,56 +1545,47 @@ CREATE OR REPLACE VIEW admin_grupo AS
 SELECT a.nombre AS nombre_admin, a.apellido,a.dni,g.nombre AS grupo_musical FROM admin a
 JOIN grupo_musical g ON a.id_grupo = g.id_grupo;
 
-USE `bandas_musicales`;
-DROP procedure IF EXISTS `sp_get_grupo_musical_order`;
+
+
+-- funciones
+
+DELIMITER $$
+USE `bandas_musicales`$$
+CREATE DEFINER=`root`@`localhost` FUNCTION `busca_grupo_musical`(busqueda VARCHAR(100)) RETURNS varchar(100) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+	DECLARE resultado VARCHAR(100);
+    SET resultado = (SELECT nombre FROM grupo_musical WHERE nombre LIKE concat('%',busqueda,'%'));
+	RETURN resultado;
+END$$
+
 
 USE `bandas_musicales`;
-DROP procedure IF EXISTS `bandas_musicales`.`sp_get_grupo_musical_order`;
+DROP function IF EXISTS `precio_con_descuento`;
+
+USE `bandas_musicales`;
+DROP function IF EXISTS `bandas_musicales`.`precio_con_descuento`;
 ;
 
 DELIMITER $$
 USE `bandas_musicales`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_get_grupo_musical_order`(IN columna CHAR(50), IN orden CHAR(5) )
+CREATE DEFINER=`root`@`localhost` FUNCTION `precio_con_descuento`(evento INT,descuento_porcentaje DECIMAL) RETURNS decimal(10,2)
+    NO SQL
 BEGIN
-	-- si el parametro de la columna no está vacio y ademas tiene el segundo parametro con las referencias ASC o DESC, entonces entra al primer if, de lo contrario no ordena la tabla
-	IF columna <> '' AND (orden = 'DESC' OR orden = 'ASC') THEN
-		SET @grupo_order = concat('ORDER BY ',columna,' ',orden);
-	ELSE
-		SET @grupo_order = '';
-	END IF;
+	DECLARE precio INT;
+    DECLARE descuento DECIMAL;
+    DECLARE resultado DECIMAL;
     
-    SET @clausula = concat('SELECT * FROM grupo_musical  ',@grupo_order);
-    PREPARE runSQL FROM @clausula;
-    EXECUTE runSQL;
-    DEALLOCATE PREPARE runSQL;
+    SET descuento = convert(100-descuento_porcentaje,decimal(10,2));
+    SET precio =
+    (SELECT precio_ticket 
+    FROM evento
+    WHERE id_evento = evento);
+    
+    SET resultado = precio * convert(descuento,decimal(10,2))/100;
+    
+RETURN resultado;
 END$$
 
 DELIMITER ;
 ;
-
-
-USE `bandas_musicales`;
-DROP procedure IF EXISTS `sp_insercion_usuario`;
-
-USE `bandas_musicales`;
-DROP procedure IF EXISTS `bandas_musicales`.`sp_insercion_usuario`;
-;
-
-DELIMITER $$
-USE `bandas_musicales`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insercion_usuario`(IN nombre VARCHAR(50),IN usuario1 VARCHAR(30), IN apellido VARCHAR(50),IN f_nac DATE, IN dni VARCHAR(11))
-BEGIN
-	 IF nombre <>'' AND usuario1 <>'' AND apellido <>''  AND dni <>'' THEN
-		INSERT INTO usuario VALUES (null
-        ,nombre
-        ,usuario1
-        ,apellido
-        ,f_nac
-        ,dni);
-	 END IF;
-END$$
-
-DELIMITER ;
-;
-
-
