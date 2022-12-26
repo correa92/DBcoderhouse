@@ -229,14 +229,12 @@ CREATE OR REPLACE VIEW admin_grupo AS
 SELECT a.nombre AS nombre_admin, a.apellido,a.dni,g.nombre AS grupo_musical FROM admin a
 JOIN grupo_musical g ON a.id_grupo = g.id_grupo;
 
-USE `bandas_musicales`;
 DROP procedure IF EXISTS `sp_get_grupo_musical_order`;
-
-USE `bandas_musicales`;
 DROP procedure IF EXISTS `bandas_musicales`.`sp_get_grupo_musical_order`;
 ;
 
 DELIMITER $$
+-- ordena las banda musicales si asi lo requieran
 USE `bandas_musicales`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_get_grupo_musical_order`(IN columna CHAR(50), IN orden CHAR(5) )
 BEGIN
@@ -256,15 +254,12 @@ END$$
 DELIMITER ;
 ;
 
-
-USE `bandas_musicales`;
 DROP procedure IF EXISTS `sp_insercion_usuario`;
-
-USE `bandas_musicales`;
 DROP procedure IF EXISTS `bandas_musicales`.`sp_insercion_usuario`;
 ;
 
 DELIMITER $$
+-- insercion de nuevos usuarios en la aplicacion, se insertan en la tabla de usuario
 USE `bandas_musicales`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insercion_usuario`(IN nombre VARCHAR(50),IN usuario1 VARCHAR(30), IN apellido VARCHAR(50),IN f_nac DATE, IN dni VARCHAR(11))
 BEGIN
@@ -281,6 +276,7 @@ END$$
 DELIMITER ;
 
 -- creacion de tablas para los trigger
+-- se registran los nuevos administradores
 CREATE TABLE new_admin(
 	id_new_admin INT PRIMARY KEY UNIQUE NOT NULL AUTO_INCREMENT,
     id_admin INT NOT NULL,
@@ -293,6 +289,7 @@ CREATE TABLE new_admin(
 	version VARCHAR(100)
 );
 
+-- se registran los datos reemplazados
 CREATE TABLE update_admin (
 	id_update_admin INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
     id_admin INT NOT NULL,
@@ -306,6 +303,7 @@ CREATE TABLE update_admin (
 	version VARCHAR(100)
     );
     
+    -- creacion de tabla para los trigger
 CREATE TABLE new_grupo_musical (
 	id_new_grupo INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
     id_grupo INT,
@@ -315,11 +313,11 @@ CREATE TABLE new_grupo_musical (
     id_redes INT,
     id_genero INT,
     usuario VARCHAR(200),
-    fecha_hora_actualizacion TIMESTAMP,
+    fecha_hora TIMESTAMP,
 	db VARCHAR(200),
 	version VARCHAR(100)
     );
-    
+        -- creacion de tabla para los trigger
 CREATE TABLE update_grupo_musical (
 	id_update_grupo INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
     id_grupo INT,
@@ -333,7 +331,7 @@ CREATE TABLE update_grupo_musical (
 	db VARCHAR(200),
 	version VARCHAR(100)
     );
-
+    -- creacion de tabla para los trigger
 CREATE TABLE delete_grupo_musical (
 	id_delete_grupo INT NOT NULL UNIQUE AUTO_INCREMENT PRIMARY KEY,
     id_grupo INT,
@@ -385,6 +383,48 @@ INSERT INTO `update_admin` VALUES (null,OLD.id_admin,OLD.nombre,OLD.apellido,OLD
 END $$
 
 DELIMITER ;
+
+
+-- funciones
+
+DELIMITER $$
+USE `bandas_musicales`$$
+-- busca el nombre de una banda especifica
+CREATE DEFINER=`root`@`localhost` FUNCTION `busca_grupo_musical`(busqueda VARCHAR(100)) RETURNS varchar(100) CHARSET utf8mb4
+    DETERMINISTIC
+BEGIN
+	DECLARE resultado VARCHAR(100);
+    SET resultado = (SELECT nombre FROM grupo_musical WHERE nombre LIKE concat('%',busqueda,'%'));
+	RETURN resultado;
+END$$
+
+
+DROP function IF EXISTS `precio_con_descuento`;
+DROP function IF EXISTS `bandas_musicales`.`precio_con_descuento`;
+;
+DELIMITER $$
+USE `bandas_musicales`$$
+-- se obtiene el precio de un ticket ingresando el id del evento y el porcentaje de descuento
+CREATE DEFINER=`root`@`localhost` FUNCTION `precio_con_descuento`(evento INT,descuento_porcentaje DECIMAL) RETURNS decimal(10,2)
+    NO SQL
+BEGIN
+	DECLARE precio INT;
+    DECLARE descuento DECIMAL;
+    DECLARE resultado DECIMAL;
+    
+    SET descuento = convert(100-descuento_porcentaje,decimal(10,2));
+    SET precio =
+    (SELECT precio_ticket 
+    FROM evento
+    WHERE id_evento = evento);
+    
+    SET resultado = precio * convert(descuento,decimal(10,2))/100;
+    
+RETURN resultado;
+END$$
+
+DELIMITER ;
+;
 
 
 
